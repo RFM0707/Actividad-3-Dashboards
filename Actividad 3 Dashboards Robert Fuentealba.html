@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reporte Interactivo de Dashboards - Autopartes</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f9fafb; /* Light gray background */
+            color: #1f2937; /* Dark text */
+        }
+        .dashboard-card {
+            background-color: #ffffff; /* White card background */
+            border: 1px solid #e5e7eb; /* Light gray border */
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+        }
+        .tab-button {
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid transparent;
+        }
+        .tab-button.active {
+            background-color: #3b82f6;
+            color: #ffffff;
+        }
+        .tab-button:not(.active) {
+            background-color: #f3f4f6;
+            color: #374151;
+        }
+        .tab-button:not(.active):hover {
+            background-color: #e5e7eb;
+        }
+        .tooltip {
+            position: relative;
+            display: inline-block;
+        }
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 250px;
+            background-color: #1f2937; /* Kept dark for contrast */
+            color: #fff;
+            text-align: left;
+            border-radius: 6px;
+            padding: 10px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -125px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            border: 1px solid #374151;
+            font-size: 0.875rem;
+            line-height: 1.25rem;
+        }
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="portada" class="min-h-screen flex flex-col items-center justify-center p-4">
+        <div class="w-full max-w-4xl bg-white rounded-xl shadow-lg p-8 md:p-12 text-center">
+            <img src="https://i.imgur.com/Qtm4v2W.png" alt="Logo Universidad Anáhuac" class="w-48 h-48 mx-auto mb-6 object-contain">
+            <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mb-2">Reporte de Diseño de Dashboards</h1>
+            <p class="text-lg text-gray-500 mb-8">Administración de Negocio de Venta de Autopartes</p>
+            
+            <hr class="my-8 border-gray-200">
+
+            <div class="text-left grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-8">
+                <div>
+                    <h2 class="text-sm font-bold uppercase text-gray-500 tracking-wider">Información del Curso</h2>
+                    <div class="mt-3 text-lg">
+                        <p class="text-gray-800"><strong class="font-semibold">Materia:</strong></p>
+                        <p class="text-gray-600">Inteligencia de Negocios</p>
+                        <p class="text-gray-800 mt-3"><strong class="font-semibold">Tarea:</strong></p>
+                        <p class="text-gray-600">Actividad 3: Dashboards (Visualizaciones)</p>
+                    </div>
+                </div>
+                 <div>
+                    <h2 class="text-sm font-bold uppercase text-gray-500 tracking-wider">Integrantes del Equipo</h2>
+                    <ul class="mt-3 text-base text-gray-600 space-y-2">
+                        <li>Robert Fuentealba - 00613424</li>
+                        <li>Aranza Ruiz Hernández - 00459496</li>
+                        <li>Roberta Pedroza - 00460036</li>
+                        <li>Santiago Suárez - 00409473</li>
+                        <li>Omar Hernández - 00444375</li>
+                        <li>Raúl Chávez - 00465543</li>
+                    </ul>
+                </div>
+            </div>
+
+            <button onclick="mostrarDashboards()" class="mt-12 w-full md:w-auto bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg transition duration-300">
+                Ver Reporte
+            </button>
+        </div>
+    </div>
+
+    <div id="reporte" class="container mx-auto p-4 md:p-8 hidden bg-white">
+        <div class="w-full flex justify-start mb-6">
+            <button onclick="mostrarPortada()" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-lg transition duration-300 flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
+                </svg>
+                Volver a la Portada
+            </button>
+        </div>
+
+        <div class="mb-8 flex flex-wrap justify-center gap-2">
+            <button class="tab-button active" onclick="openTab(event, 'Dashboard1')">Desempeño General</button>
+            <button class="tab-button" onclick="openTab(event, 'Dashboard2')">Análisis de Inventario</button>
+            <button class="tab-button" onclick="openTab(event, 'Dashboard3')">Análisis de Clientes</button>
+        </div>
+
+        <div id="Dashboard1" class="tab-content">
+            <h2 class="text-3xl font-bold text-gray-900 mb-6 text-center">Dashboard 1: Desempeño General de Ventas</h2>
+            
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <div class="dashboard-card text-center">
+                    <h3 class="text-lg font-medium text-gray-500">Ingresos Totales (Últ. 30 días)</h3>
+                    <p class="text-4xl font-bold text-gray-900 mt-2">$45,231.89</p>
+                </div>
+                <div class="dashboard-card text-center">
+                    <h3 class="text-lg font-medium text-gray-500">Ventas Totales (Últ. 30 días)</h3>
+                    <p class="text-4xl font-bold text-gray-900 mt-2">1,234</p>
+                </div>
+                <div class="dashboard-card text-center">
+                    <h3 class="text-lg font-medium text-gray-500">Ticket Promedio</h3>
+                    <p class="text-4xl font-bold text-gray-900 mt-2">$36.65</p>
+                </div>
+                <div class="dashboard-card text-center">
+                    <h3 class="text-lg font-medium text-gray-500">Margen de Beneficio</h3>
+                    <p class="text-4xl font-bold text-gray-900 mt-2">28.5%</p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-5 gap-6">
+                <div class="lg:col-span-3 dashboard-card">
+                    <h3 class="text-xl font-semibold text-gray-900 mb-4 flex items-center">
+                        Ventas Mensuales (Últimos 12 Meses)
+                        <div class="tooltip ml-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" /></svg>
+                            <span class="tooltiptext">
+                                <b>Funcionalidades para desarrollador:</b><br />
+                                - Filtro de rango de fechas (mes, trimestre, año, personalizado).<br />
+                                - Tooltips al pasar el cursor sobre una barra para ver el valor exacto.<br />
+                                - Hacer clic en una barra para ver el desglose de ventas de ese mes.
+                            </span>
+                        </div>
+                    </h3>
+                    <div class="relative h-80">
+                        <canvas id="ventasMensualesChart"></canvas>
+                    </div>
+                </div>
+                <div class="lg:col-span-2 dashboard-card">
+                    <h3 class="text-xl font-semibold text-gray-900 mb-4 flex items-center">
+                        Ventas por Categoría
+                        <div class="tooltip ml-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" /></svg>
+                            <span class="tooltiptext">
+                                <b>Funcionalidades para desarrollador:</b><br />
+                                - Leyenda interactiva (clic para ocultar/mostrar una categoría).<br />
+                                - Tooltips con valor y porcentaje.<br />
+                                - Clic en un segmento para ver los productos más vendidos de esa categoría.
+                            </span>
+                        </div>
+                    </h3>
+                    <div class="relative h-80">
+                        <canvas id="ventasPorCategoriaChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="Dashboard2" class="tab-content hidden">
+            <h2 class="text-3xl font-bold text-gray-900 mb-6 text-center">Dashboard 2: Análisis de Inventario y Productos</h2>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="dashboard-card">
+                    <h3 class="text-xl font-semibold text-gray-900 mb-4 flex items-center">
+                        Top 10 Productos Más Vendidos
+                         <div class="tooltip ml-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" /></svg>
+                            <span class="tooltiptext">
+                                <b>Funcionalidades para desarrollador:</b><br />
+                                - Barra de búsqueda para filtrar productos por nombre o SKU.<br />
+                                - Ordenar tabla por cualquier columna (ascendente/descendente).<br />
+                                - Paginación si la lista es larga.<br />
+                                - Clic en una fila para ver el historial de ventas y stock del producto.
+                            </span>
+                        </div>
+                    </h3>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm text-left text-gray-600">
+                            <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+                                <tr>
+                                    <th scope="col" class="px-4 py-3">SKU</th>
+                                    <th scope="col" class="px-4 py-3">Producto</th>
+                                    <th scope="col" class="px-4 py-3">Categoría</th>
+                                    <th scope="col" class="px-4 py-3">Unidades</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="border-b">
+                                    <td class="px-4 py-3">F-150-BRK</td><td class="px-4 py-3">Pastillas de Freno Brembo</td><td class="px-4 py-3">Mecánica</td><td class="px-4 py-3">152</td>
+                                </tr>
+                                <tr class="border-b">
+                                    <td class="px-4 py-3">LL-P205-MCH</td><td class="px-4 py-3">Llanta Michelin 205/55 R16</td><td class="px-4 py-3">Mecánica</td><td class="px-4 py-3">128</td>
+                                </tr>
+                                 <tr class="border-b">
+                                    <td class="px-4 py-3">ARO-PIN-01</td><td class="px-4 py-3">Aromatizante Pino</td><td class="px-4 py-3">Cosmética</td><td class="px-4 py-3">98</td>
+                                </tr>
+                                <tr class="border-b">
+                                    <td class="px-4 py-3">BUJ-NGK-IR</td><td class="px-4 py-3">Bujía NGK Iridium</td><td class="px-4 py-3">Mecánica</td><td class="px-4 py-3">85</td>
+                                </tr>
+                                <tr>
+                                    <td class="px-4 py-3">ESP-VAN-LED</td><td class="px-4 py-3">Espejo Vanidad con Luz LED</td><td class="px-4 py-3">Cosmética</td><td class="px-4 py-3">77</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="dashboard-card">
+                     <h3 class="text-xl font-semibold text-gray-900 mb-4 flex items-center">
+                        Productos con Bajo Stock (Menos de 10 unidades)
+                         <div class="tooltip ml-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" /></svg>
+                            <span class="tooltiptext">
+                                <b>Funcionalidades para desarrollador:</b><br />
+                                - Resaltar en rojo las filas con stock crítico (ej. <= 5).<br />
+                                - Botón "Generar Orden de Compra" para los productos seleccionados.<br />
+                                - Mostrar "Días de stock restantes" basado en la velocidad de venta promedio.
+                            </span>
+                        </div>
+                    </h3>
+                    <div class="overflow-x-auto">
+                         <table class="w-full text-sm text-left text-gray-600">
+                            <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+                                <tr>
+                                    <th scope="col" class="px-4 py-3">SKU</th>
+                                    <th scope="col" class="px-4 py-3">Producto</th>
+                                    <th scope="col" class="px-4 py-3">Stock Actual</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="border-b text-red-600 font-medium">
+                                    <td class="px-4 py-3">FIL-AIR-05</td><td class="px-4 py-3">Filtro de Aire Mann-Filter</td><td class="px-4 py-3">5</td>
+                                </tr>
+                                <tr class="border-b">
+                                    <td class="px-4 py-3">ACE-MOT-530</td><td class="px-4 py-3">Aceite Motul 5W30 Sintético</td><td class="px-4 py-3">8</td>
+                                </tr>
+                                 <tr class="border-b">
+                                    <td class="px-4 py-3">LIM-PAR-01</td><td class="px-4 py-3">Limpiaparabrisas Bosch</td><td class="px-4 py-3">9</td>
+                                </tr>
+                                <tr class="border-b text-red-600 font-medium">
+                                    <td class="px-4 py-3">FUND-VOL-02</td><td class="px-4 py-3">Funda para Volante de Piel</td><td class="px-4 py-3">3</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="Dashboard3" class="tab-content hidden">
+            <h2 class="text-3xl font-bold text-gray-900 mb-6 text-center">Dashboard 3: Análisis de Clientes y Vehículos</h2>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="dashboard-card">
+                    <h3 class="text-xl font-semibold text-gray-900 mb-4 flex items-center">
+                        Ventas por Marca de Vehículo
+                         <div class="tooltip ml-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" /></svg>
+                            <span class="tooltiptext">
+                                <b>Funcionalidades para desarrollador:</b><br />
+                                - Filtros por categoría de producto (ej. ver qué marcas compran más partes cosméticas).<br />
+                                - Clic en una marca para ver los modelos específicos más populares.<br />
+                                - Comparar el rendimiento de las marcas en diferentes periodos de tiempo.
+                            </span>
+                        </div>
+                    </h3>
+                    <div class="relative h-80">
+                        <canvas id="ventasPorMarcaChart"></canvas>
+                    </div>
+                </div>
+                <div class="dashboard-card">
+                    <h3 class="text-xl font-semibold text-gray-900 mb-4 flex items-center">
+                        Ventas por Antigüedad del Vehículo
+                         <div class="tooltip ml-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" /></svg>
+                            <span class="tooltiptext">
+                                <b>Funcionalidades para desarrollador:</b><br />
+                                - Analizar qué tipo de partes (mecánicas vs. cosméticas) se venden más para cada rango de antigüedad.<br />
+                                - Identificar oportunidades de mercado (ej. alta demanda de partes para autos de 5-7 años).
+                            </span>
+                        </div>
+                    </h3>
+                    <div class="relative h-80">
+                        <canvas id="ventasPorAntiguedadChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        function mostrarDashboards() {
+            document.getElementById('portada').classList.add('hidden');
+            document.getElementById('reporte').classList.remove('hidden');
+            document.body.style.backgroundColor = '#ffffff';
+            initCharts();
+        }
+
+        function mostrarPortada() {
+            document.getElementById('reporte').classList.add('hidden');
+            document.getElementById('portada').classList.remove('hidden');
+            document.body.style.backgroundColor = '#f9fafb';
+        }
+
+        function openTab(evt, tabName) {
+            let i, tabcontent, tablinks;
+            tabcontent = document.getElementsByClassName("tab-content");
+            for (i = 0; i < tabcontent.length; i++) {
+                tabcontent[i].classList.add('hidden');
+            }
+            tablinks = document.getElementsByClassName("tab-button");
+            for (i = 0; i < tablinks.length; i++) {
+                tablinks[i].classList.remove("active");
+            }
+            document.getElementById(tabName).classList.remove('hidden');
+            evt.currentTarget.classList.add("active");
+        }
+
+        let chartsInitialized = false;
+        let chartInstances = {};
+
+        function initCharts() {
+            if (chartsInitialized) return;
+            chartsInitialized = true;
+
+            const chartTextColor = '#374151';
+            const chartGridColor = 'rgba(229, 231, 235, 0.8)';
+            
+            const ctx1 = document.getElementById('ventasMensualesChart').getContext('2d');
+            chartInstances.ventasMensuales = new Chart(ctx1, {
+                type: 'bar',
+                data: {
+                    labels: ['Oct', 'Nov', 'Dic', 'Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep'],
+                    datasets: [{
+                        label: 'Ingresos por Ventas',
+                        data: [18000, 19000, 25000, 22000, 24000, 28000, 32000, 35000, 31000, 40000, 42000, 45231],
+                        backgroundColor: 'rgba(59, 130, 246, 0.7)',
+                        borderColor: 'rgba(59, 130, 246, 1)',
+                        borderWidth: 1,
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false }, title: { display: false } },
+                    scales: {
+                        y: { beginAtZero: true, ticks: { color: chartTextColor }, grid: { color: chartGridColor } },
+                        x: { ticks: { color: chartTextColor }, grid: { display: false } }
+                    }
+                }
+            });
+
+            const ctx2 = document.getElementById('ventasPorCategoriaChart').getContext('2d');
+            chartInstances.ventasPorCategoria = new Chart(ctx2, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Partes Mecánicas', 'Partes Cosméticas'],
+                    datasets: [{
+                        data: [75, 25],
+                        backgroundColor: ['rgba(59, 130, 246, 0.8)', 'rgba(16, 185, 129, 0.8)'],
+                        borderColor: ['#ffffff'],
+                        borderWidth: 3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'bottom', labels: { color: chartTextColor } } }
+                }
+            });
+
+            const ctx3 = document.getElementById('ventasPorMarcaChart').getContext('2d');
+            chartInstances.ventasPorMarca = new Chart(ctx3, {
+                type: 'bar',
+                data: {
+                    labels: ['Nissan', 'Chevrolet', 'Volkswagen', 'Ford', 'Toyota', 'Honda'],
+                    datasets: [{
+                        label: 'Ingresos por Marca',
+                        data: [12500, 11000, 9500, 8000, 7500, 6000],
+                        backgroundColor: 'rgba(236, 72, 153, 0.7)',
+                        borderColor: 'rgba(236, 72, 153, 1)',
+                        borderWidth: 1,
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                         x: { ticks: { color: chartTextColor }, grid: { color: chartGridColor } },
+                        y: { ticks: { color: chartTextColor }, grid: { display: false } }
+                    }
+                }
+            });
+            
+            const ctx4 = document.getElementById('ventasPorAntiguedadChart').getContext('2d');
+            chartInstances.ventasPorAntiguedad = new Chart(ctx4, {
+                type: 'bar',
+                data: {
+                    labels: ['0-2 años', '3-5 años', '6-8 años', '9-10 años'],
+                    datasets: [{
+                        label: 'Ingresos por Antigüedad',
+                        data: [5000, 15000, 20000, 18000],
+                        backgroundColor: ['rgba(16, 185, 129, 0.7)', 'rgba(59, 130, 246, 0.7)', 'rgba(234, 179, 8, 0.7)', 'rgba(239, 68, 68, 0.7)'],
+                        borderWidth: 0,
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                         y: { ticks: { color: chartTextColor }, grid: { color: chartGridColor } },
+                        x: { ticks: { color: chartTextColor }, grid: { display: false } }
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>
